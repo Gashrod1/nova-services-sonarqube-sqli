@@ -401,7 +401,7 @@ tableau de bord sans vulnérabilité SQL ne prouve pas l'absence d'injection SQL
 |---|---|---|
 | `compose.yaml` sans secret | `compose.yaml` (mot de passe dans `.env`, exclu par `.gitignore`) | ✅ |
 | `sonar-project.properties` | `TIWAP/sonar-project.properties` | ✅ |
-| Capture de SonarQube montrant le projet | — | ⏳ **à faire par l'utilisateur** |
+| Capture de SonarQube montrant le projet | [`captures/`](captures/) | ✅ `sonarqube-projets.png` (liste des projets, TIWAP : Security E/31, Quality Gate Failed), `sonarqube-overview-1.1-fix.png` (vue d'ensemble, version 1.1-fix, 2,4k lignes), `sonarqube-issues-securite.png` (exemples d'anomalies de sécurité Blocker/High) |
 | Tableau d'analyse initiale | §8.1 | ✅ |
 | Code vulnérable et version corrigée | §9 et §10 (diff) | ✅ |
 | Explication technique de la correction | §10 | ✅ |
@@ -416,5 +416,5 @@ Aucun jeton ni mot de passe n'apparaît dans les livrables.
 ## À faire par l'utilisateur
 
 1. ~~Relancer l'analyse sur la branche corrigée~~ : fait (commit `bd689a5`, version `1.1-fix`).
-2. **Capture d'écran** du projet `tiwap` dans `http://localhost:9000` (tableau de bord avec les mesures).
+2. ~~Capture d'écran du projet `tiwap`~~ : faite (dossier `captures/`).
 3. **Nettoyage (§17)** : `sudo docker compose down` (conserve l'historique) et **révoquer le jeton** dans SonarQube (Mon compte → Sécurité).
