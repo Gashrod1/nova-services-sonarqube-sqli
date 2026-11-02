@@ -310,6 +310,13 @@ n'apparaît dans aucun fichier.
 | Mesures SonarQube | 31 vulnérabilités, note E, 5 bugs, 16 code smells | **31 vulnérabilités, note E, 5 bugs, 16 code smells**, 0 hotspot, 2 390 lignes de code (+22 avec le fichier de test) ; sur `SQLi.py`, seule reste l'alerte `python:S4790` (hachage, l. 153), déjà présente avant ; aucune alerte sur `tests/test_sqli_regression.py` |
 | Risque résiduel | Contournement d'authentification, lecture de `users` | Faible pour `sqli_low` ; **élevé** pour les autres fonctions de `SQLi.py` |
 
+> Les captures affichent **Reliability 21** et **Maintainability 7** : l'instance
+> est en mode MQR (*Multi-Quality Rule*), qui classe les anomalies par qualité
+> logicielle impactée. Les valeurs 5 bugs / 16 code smells du tableau sont les
+> métriques historiques (`bugs`, `code_smells`) lues dans l'API ; les deux
+> décomptes ne se recouvrent pas exactement. Le chiffre de sécurité (31, note E)
+> est identique dans les deux modes.
+
 **Pourquoi SonarQube ne peut pas montrer l'amélioration.** L'anomalie n'ayant
 jamais été signalée, sa disparition ne peut pas apparaître dans le tableau de
 bord. La conclusion repose donc sur **le code (diff), le rejeu et les tests**,
