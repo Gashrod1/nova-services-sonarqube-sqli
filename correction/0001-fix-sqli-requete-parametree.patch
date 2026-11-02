@@ -1,0 +1,91 @@
+From bd689a56a1a7defac9e158a4e2296023844157b7 Mon Sep 17 00:00:00 2001
+From: gash <m.peau@alternadom.com>
+Date: Mon, 2 Nov 2026 08:53:27 +0100
+Subject: [PATCH] =?UTF-8?q?fix(sqli):=20requ=C3=AAte=20param=C3=A9tr=C3=A9?=
+ =?UTF-8?q?e=20dans=20sqli=5Flow=20+=20tests=20de=20non-r=C3=A9gression?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ tests/test_sqli_regression.py | 42 +++++++++++++++++++++++++++++++++++
+ vulnerabilities/SQLi.py       | 12 +++++-----
+ 2 files changed, 49 insertions(+), 5 deletions(-)
+ create mode 100644 tests/test_sqli_regression.py
+
+diff --git a/tests/test_sqli_regression.py b/tests/test_sqli_regression.py
+new file mode 100644
+index 0000000..3086a8c
+--- /dev/null
++++ b/tests/test_sqli_regression.py
+@@ -0,0 +1,42 @@
++"""Tests de non-régression : injection SQL dans sqli_low (vulnerabilities/SQLi.py).
++
++Chaque test travaille sur une copie temporaire de TIWAP.db : la base du dépôt
++n'est jamais modifiée et l'application n'est pas lancée.
++"""
++import importlib
++import shutil
++import sys
++from pathlib import Path
++
++import pytest
++
++TIWAP_DIR = Path(__file__).resolve().parents[1]
++PAYLOAD = "x' OR '1'='1' --"
++
++
++@pytest.fixture
++def sqli(tmp_path, monkeypatch):
++    shutil.copy(TIWAP_DIR / "TIWAP.db", tmp_path / "TIWAP.db")
++    monkeypatch.chdir(tmp_path)  # DBManager ouvre 'TIWAP.db' dans le répertoire courant
++    monkeypatch.syspath_prepend(str(TIWAP_DIR))
++    for name in ("vulnerabilities.SQLi", "helper.db_manager"):
++        sys.modules.pop(name, None)
++    return importlib.import_module("vulnerabilities.SQLi")
++
++
++def test_injection_ne_contourne_pas_le_filtre(sqli):
++    # Avant correction, cette charge renvoyait les 5 comptes de la table users.
++    assert sqli.sqli_low(username=PAYLOAD, password="peu-importe") == []
++
++
++def test_quote_traitee_comme_une_valeur(sqli):
++    # Une apostrophe ne doit plus casser la requête ni remonter d'erreur SQL.
++    assert sqli.sqli_low(username="O'Brien", password="x'y") == []
++
++
++def test_identifiants_inconnus(sqli):
++    assert sqli.sqli_low(username="inconnu", password="faux") == []
++
++
++def test_utilisateur_existant_comportement_inchange(sqli):
++    assert sqli.sqli_low(username="admin", password="peu-importe") == "User Exists"
+diff --git a/vulnerabilities/SQLi.py b/vulnerabilities/SQLi.py
+index 6cca8d5..455ebca 100644
+--- a/vulnerabilities/SQLi.py
++++ b/vulnerabilities/SQLi.py
+@@ -19,13 +19,15 @@ def sqli_low(username, password):
+         return "User Exists"
+ 
+     try:
+-        stmt = "SELECT userid, username FROM users WHERE username='%s' AND password='%s'" \
+-               % (str(username), str(password))
++        # Requête paramétrée : la structure SQL est fixe, les entrées sont
++        # transmises au pilote sqlite3 comme des valeurs (marqueur « ? »).
++        stmt = "SELECT userid, username FROM users WHERE username = ? AND password = ?"
+ 
+-        result = cur.execute(stmt)
++        result = cur.execute(stmt, (str(username), str(password)))
+ 
+-    except sqlite3.OperationalError as e:
+-        return e
++    except sqlite3.OperationalError:
++        # Ne pas renvoyer le message SQL détaillé à l'utilisateur.
++        return "Erreur lors de la requête"
+ 
+     return result.fetchall()
+ 
+-- 
+2.56.0
+

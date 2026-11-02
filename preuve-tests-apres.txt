@@ -1,0 +1,6 @@
+# Après correction — 2026-11-02T08:53:27+01:00
+tests/test_sqli_regression.py::test_injection_ne_contourne_pas_le_filtre PASSED [ 25%]
+tests/test_sqli_regression.py::test_quote_traitee_comme_une_valeur PASSED [ 50%]
+tests/test_sqli_regression.py::test_identifiants_inconnus PASSED         [ 75%]
+tests/test_sqli_regression.py::test_utilisateur_existant_comportement_inchange PASSED [100%]
+============================== 4 passed in 0.02s ===============================

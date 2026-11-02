@@ -1,0 +1,3 @@
+E       AssertionError: assert [(1, 'admin')...5, 'pconnor')] == []
+E       assert OperationalError('near "Brien": syntax error') == []
+2 failed, 2 passed in 0.02s
